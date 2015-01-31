@@ -1,0 +1,14 @@
+.terminal {
+  float: left;
+  padding: 5px;
+  border: #000 solid 5px;
+  font-family: "Ubuntu Mono", "Monaco", "DejaVu Sans Mono", "Liberation Mono", monospace;
+  font-size: 18px;
+  color: #f0f0f0;
+  background: #555;
+}
+
+.terminal-cursor {
+  color: #000;
+  background: #f0f0f0;
+}
