@@ -1,3 +1,8 @@
+#output {
+  height:300px;
+  overflow:auto
+}
+
 .terminal {
   float: left;
   padding: 5px;

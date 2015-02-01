@@ -1,4 +1,24 @@
 
+$(function() {
+  var socket = new SockJS('http://localhost:3000/echo');
+  socket.onopen = function() {
+    console.log('open');
+  };
+  socket.onmessage = function(e) {
+    $('#output').append(e.data);
+  };
+  socket.onclose = function() {
+    console.log('close');
+  };
+
+  $('#my-form').submit(function() {
+    command = $("input[name='command']").val();
+    socket.send(command);
+    $("input[name='command']").val('');
+  });
+});
+  
+/*
 (function() {
   window.onload = function() {
     var socket = io.connect();
@@ -31,3 +51,4 @@
     });
   };
 }).call(this);
+*/

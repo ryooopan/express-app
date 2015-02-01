@@ -1,33 +1,52 @@
 
-var http = require('http')
-, express = require('express')
-, io = require('socket.io')
-, pty = require('pty.js')
-, terminal = require('term.js');
-
-/**
- * term.js
- */
+var http = require('http'),
+    express = require('express'),
+    io = require('socket.io'),
+    pty = require('pty.js'),
+    sockjs = require('sockjs'),
+    terminal = require('term.js');
 
 process.title = 'term.js';
-
-/**
- * Dump
- */
 
 var stream;
 if (process.argv[2] === '--dump') {
   stream = require('fs').createWriteStream(__dirname + '/dump.log');
 }
 
-/**
- * Open Terminal
- */
+var buff = [],
+    socket,
+    term;
 
-var buff = []
-, socket
-, term;
+var echo = sockjs.createServer();
+echo.on('connection', function(conn) {
+  var term = pty.spawn('bash', [], {
+    name: 'xterm-color',
+    cols: 80,
+    rows: 30,
+    cwd: process.env.HOME,
+    env: process.env
+  });
+  
+  term.on('data', function(data) {
+    conn.write(data);
+  });
 
+  conn.on('data', function(message) {
+    console.log(message);
+    term.write(message + '\r');
+  });
+
+  conn.on('close', function() {
+    term.kill();
+  });
+});
+
+var app = express(),
+    server = http.createServer(app);
+
+echo.installHandlers(server, { prefix: '/echo' });
+
+/*
 term = pty.fork(process.env.SHELL || 'sh', [], {
   name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
     ? 'xterm-256color'
@@ -38,6 +57,7 @@ term = pty.fork(process.env.SHELL || 'sh', [], {
 });
 
 term.on('data', function(data) {
+  console.log(data);
   if (stream) stream.write('OUT: ' + data + '\n-\n');
   return !socket
     ? buff.push(data)
@@ -48,10 +68,6 @@ console.log(''
 	    + 'Created shell with pty master/slave'
 	    + ' pair (master: %d, pid: %d)',
 	    term.fd, term.pid);
-
-/**
- * App & Server
- */
 
 var app = express()
 , server = http.createServer(app);
@@ -69,6 +85,10 @@ app.use(function(req, res, next) {
   };
   next();
 });
+
+*/
+
+
 
 /*
 app.use(express.basicAuth(function(user, pass, next) {
